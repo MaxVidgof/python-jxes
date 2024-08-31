@@ -1,0 +1,26 @@
+[project]
+name = "jxes"
+version = "0.0.4"
+authors = [
+  { name="Maxim Vidgof", email="maxim.vidgof@wu.ac.at" },
+]
+description = "Python implementation of JXES"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = ["pm4py"]
+
+[project.urls]
+Homepage = "https://github.com/MaxVidgof/python-jxes"
+Issues = "https://github.com/MaxVidgof/python-jxes/issues"
+
+[build-system]
+requires = ["hatchling", "pm4py"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["jxes"]
