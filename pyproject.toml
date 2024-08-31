@@ -1,6 +1,6 @@
 [project]
 name = "jxes"
-version = "0.0.4"
+version = "0.1"
 authors = [
   { name="Maxim Vidgof", email="maxim.vidgof@wu.ac.at" },
 ]

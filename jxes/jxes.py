@@ -1,16 +1,9 @@
 from pm4py.objects.log.util import xes as xes_util
 from pm4py.objects.log.obj import EventLog, Trace, Event, EventStream
-from io import BytesIO, StringIO
 import json
 from datetime import datetime,timezone
-import tqdm
 import re
 from tqdm.auto import tqdm
-
-#ENCODING = "utf-8"
-
-# load -from stream or file; loads - from stirng
-# dump -to stream or file; dumps - to string
 
 timestamp_pattern = re.compile(
     r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[\+\-]\d{2}:\d{2})?$'
@@ -26,15 +19,8 @@ def get_attr_value(value):
 def export_attribute(attr_name, attr_value):
 	if attr_name is None or attr_value is None:
 		return {}
-#	if not attr_type == xes_util.TAG_LIST:
-#	else:
-
-#	if type(attr_value) == list:
-		# list
-#		return {attr_name:[export_attributes(item)]}
 	if type(attr_value) == dict:
 		if attr_value["value"] is None:
-			print(attr_value["children"])
 			if type(attr_value["children"])==list:
 				# list
 				return {attr_name:[export_attribute(k,v) for (k,v) in attr_value["children"]]}
@@ -62,7 +48,7 @@ def log_to_jxes(log):
 
 	jxes_log = {}
 	jxes_log["log-properties"] = {}
-	jxes_log["log-properties"]["xes.version"] = "1849-2023" # todo: fix
+	jxes_log["log-properties"]["xes.version"] = "1849-2023"
 	jxes_log["log-properties"]["xes.features"] = "nested-attributes"
 
 	jxes_log["log-attrs"] = {}
@@ -106,11 +92,18 @@ def log_to_jxes(log):
 	return jxes_log
 
 def write_log(log, f):
-	#f.write("test") #.encode(encoding))
 	json.dump(log_to_jxes(log),f,indent='\t')
 	return f
 
 def write_jxes(log, filename):
+	"""Writes a JXES log to the specified filename.
+
+	Parameters
+	----------
+	log (EventLog | EventStream): The event log or event stream to serialize.
+	filename (str):	The name of the input file (e.g. 'log.jxes').
+	"""
+
 	with open(filename, 'w') as f:
 		write_log(log,f)
 
@@ -177,7 +170,6 @@ def jxes_to_log(jxes_log):
 				trace.attributes[attr_name] = parse_attr_value(attr_value)
 			for jxes_event in jxes_trace["events"]:
 				event = Event(import_attributes(jxes_event))
-				#{attr_name: parse_attr_value(attr_value) for attr_name, attr_value in jxes_event.items()}
 				trace.append(event)
 			log.append(trace)
 			if progress is not None:
@@ -200,36 +192,16 @@ def read_log(f,file_size=None):
 	return jxes_to_log(json.load(f))
 
 def read_jxes(filename):
+	"""Reads a JXES log from the specified filename.
+
+	Parameters
+	----------
+	filename (str): The name of the input file (e.g. 'log.jxes')
+	"""
+
 	with open(filename, 'r') as f:
 		log = read_log(f)
 	return log
-
-#file_size = os.stat(filename).st_size
-
-if __name__=="__main__":
-	from pm4py import read_xes, write_xes
-	import sys
-	filename = sys.argv[1]
-	if filename.endswith(".xes"):
-		log = read_xes(filename, return_legacy_log_object=True, variant='iterparse_20')
-		# Output to file
-		with open(filename.replace(".xes",".jxes"), "w") as w:
-			write_log(log,w)
-	elif filename.endswith(".jxes"):
-		with open(filename,'r') as f:
-			out_log = read_log(f)
-		write_xes(out_log,'ttt.xes')
-	else: print("Error")
-
-	#encoding = ENCODING
-	#b = BytesIO()
-	#b.write("test".encode(encoding))
-	#print(b.getvalue().decode(encoding))
-
-	# Output to stdout
-	#s = StringIO()
-	#r = write_log(log,s)
-	#print(r.getvalue()) #.decode(encoding))
 
 __all__ = ["get_attr_value", "export_attribute", "extract_trace", "log_to_jxes",
 	"write_log", "write_jxes", "parse_attr_value", "import_attributes",
